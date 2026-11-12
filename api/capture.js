@@ -30,7 +30,7 @@ const KEY = 'sb_publishable_4ESnG-cwrDaNVtDqY_-zpw_Yf6tLhVy';
 // runtime; Vercel's newer Node runtimes aren't on its list, so say which one this is before it loads.
 let CH = null;
 const chromiumP = () => CH || (CH = (async () => { if (!/^AWS_Lambda_nodejs(20|22)\.x$/.test(process.env.AWS_EXECUTION_ENV || '')) process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_nodejs22.x'; return (await import('@sparticuz/chromium')).default; })());
-let AGENT = null;
+let AGENT = null, EXE = null;
 const agent = () => AGENT || (AGENT = readFileSync(join(process.cwd(), 'capture', 'agent.js'), 'utf8'));
 
 async function adminFrom(req){
@@ -140,10 +140,12 @@ export default async function handler(req, res){
   let browser;
   try {
     const chromium = await chromiumP();
-    const exe = await chromium.executablePath();
+    // one unpack of Chrome per instance: parallel captures on a cold instance used to race here and fail with spawn ETXTBSY
+    const exe = await (EXE || (EXE = chromium.executablePath().catch(e => { EXE = null; throw e; })));
     // single: chromium's Lambda default (--single-process). Some sites (Kuda) swap their main frame into another renderer
     // mid-load, which single-process Chrome can't follow ("Attempted to use detached Frame"); the retry runs multi-process.
-    const launch = single => puppeteer.launch({ args: [...chromium.args.filter(a => single || a !== '--single-process'), '--hide-scrollbars', '--disable-dev-shm-usage', ...(single ? [] : ['--disable-features=site-per-process,IsolateOrigins', '--disable-site-isolation-trials']), ...(b.nogl ? ['--disable-webgl', '--disable-webgl2', '--disable-3d-apis'] : [])], defaultViewport: { width: W, height: H, deviceScaleFactor: S, isMobile: W < 600, hasTouch: W < 600 }, executablePath: exe, headless: true });
+    const launch = async single => { for (let k = 0; ; k++) { try { return await launch1(single); } catch (e) { if (k >= 4 || !/ETXTBSY|EBUSY/.test(String(e && e.message))) throw e; await new Promise(r => setTimeout(r, 400 + k * 600)); } } };
+    const launch1 = single => puppeteer.launch({ args: [...chromium.args.filter(a => single || a !== '--single-process'), '--hide-scrollbars', '--disable-dev-shm-usage', ...(single ? [] : ['--disable-features=site-per-process,IsolateOrigins', '--disable-site-isolation-trials']), ...(b.nogl ? ['--disable-webgl', '--disable-webgl2', '--disable-3d-apis'] : [])], defaultViewport: { width: W, height: H, deviceScaleFactor: S, isMobile: W < 600, hasTouch: W < 600 }, executablePath: exe, headless: true });
     browser = await launch(true);
     let page, prepped = null;
     const open = async u => {
