@@ -52,8 +52,9 @@
   const AGENTS = [['claude', 'Claude'], ['codex', 'Codex'], ['antigravity', 'Antigravity']];
   // same markup as library logos, so logos.js fits them to the rounded square like every other company icon
   const ownLogo = (dir, k, n) => `<span class="app-ic lg-logo"><img src="/img/${dir}/${k}.webp" alt="${n}" decoding="async"></span>`;
-  const swapImgs = (dir, list, rot) => swap(list.map(([k, n]) => ownLogo(dir, k, n)), rot);
-  const swap = (items, rot) => `<span class="lv-swap" aria-hidden="true">${items.map((h, i) => `<span class="lv-tile${i ? '' : ' on'}" style="--r:${rot}deg">${h}</span>`).join('')}</span>`;
+  const swapImgs = (dir, list, rot) => swap(list.map(([k, n]) => ownLogo(dir, k, n)), rot, list.map(([k]) => k));
+  // keys name the company behind each logo: the same company never shows in two slots at once (Moniepoint is in two lists)
+  const swap = (items, rot, keys = [], start = 0) => `<span class="lv-swap" aria-hidden="true">${items.map((h, i) => `<span class="lv-tile${i === start ? ' on' : ''}" data-k="${keys[i] || ''}" style="--r:${rot}deg">${h}</span>`).join('')}</span>`;
   const swapApps = (ids, rot) => swap(ids.filter(app).map(id => logo(id)), rot);
   const btns = (a, b, size = 'btn-lg') => `<div class="lv-btns"><a class="btn btn-primary ${size}" href="${a[1]}">${a[0]}</a><a class="btn btn-secondary ${size}" href="${b[1]}">${b[0]}</a></div>`;
   const signedIn = () => typeof LV !== 'undefined' && LV.user;
@@ -104,7 +105,7 @@
 
     return `${nav()}<main class="lv">
       <section class="lv-hero hero" data-sec="hero"><div class="lv-in">
-        <h1 class="lv-h1" aria-label="Where teams and agents find the local context to build better products."><span class="lv-l">Where teams ${swapImgs('teams', TEAMS, -6)} and agents ${swapImgs('agents', AGENTS, 5)}</span><span class="lv-l">find the local context</span><span class="lv-l">to build better ${swap([ownLogo('teams', 'moniepoint', 'Moniepoint'), ...['kuda', 'cowrywise'].filter(app).map(id => logo(id))], -4)} products.</span></h1>
+        <h1 class="lv-h1" aria-label="Where teams and agents find the local context to build better products."><span class="lv-l">Where teams ${swapImgs('teams', TEAMS, -6)} and agents ${swapImgs('agents', AGENTS, 5)}</span><span class="lv-l">find the local context</span><span class="lv-l">to build better ${((ids) => swap([ownLogo('teams', 'moniepoint', 'Moniepoint'), ...ids.map(id => logo(id))], -4, ['moniepoint', ...ids], ids.length ? 1 : 0))(['kuda', 'cowrywise'].filter(app))} products.</span></h1>
         <p class="lv-sub">The design reference library for African apps and sites. ${nApps ? `${fmt(nApps)} companies` : 'Hundreds of companies'}${nSec ? `, ${fmt(nSec)} website sections` : ''} and counting.</p>
         ${btns(['Join for free', '/signup'], ['See plans', '/pricing'])}</div>
         <div class="lv-wall" aria-hidden="true"><div class="lv-wallin">${wall.join('')}</div><span class="lv-fade"></span></div>
@@ -226,7 +227,12 @@
       if (document.hidden || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
       document.querySelectorAll('.lv-h1 .lv-swap').forEach((box, k) => setTimeout(() => {
         const t = [...box.children]; if (t.length < 2) return;
-        const i = t.findIndex(x => x.classList.contains('on')), n = (i + 1) % t.length;
+        const i = t.findIndex(x => x.classList.contains('on'));
+        // skip a logo another slot is showing (or still fading out of)
+        const shown = new Set([...document.querySelectorAll('.lv-h1 .lv-swap')].filter(b => b !== box).flatMap(b => [...b.querySelectorAll('.lv-tile.on,.lv-tile.out')].map(o => o.dataset.k)).filter(Boolean)); // .out is still fading away
+        let n = (i + 1) % t.length;
+        for (let g = 0; g < t.length && t[n].dataset.k && shown.has(t[n].dataset.k); g++) n = (n + 1) % t.length;
+        if (n === i) return;
         t.forEach(x => x.classList.remove('out'));
         if (i > -1) { t[i].classList.remove('on'); t[i].classList.add('out'); }
         t[n].classList.add('on');
