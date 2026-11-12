@@ -1,0 +1,150 @@
+/* ============ Responsive fixes (Nov 2026) ============
+   Loaded last, so it wins over the page styles. Every rule here is for phones and tablets (or narrow windows):
+   nothing runs off the side of the screen, buttons keep their labels, and tables become cards. */
+
+/* ---------- Tabs and segmented controls: one line, swipe sideways, never squash words ---------- */
+@media (max-width: 960px) {
+  body .tabs, body .cp-tabs, body .cp-seg, body .pp-seg, body .ag-seg, body .au-seg, body .st-tabs, body .lv-tabs, body .seg {
+    flex-wrap: nowrap !important; overflow-x: auto; overflow-y: hidden; max-width: 100%;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+  }
+  body .tabs::-webkit-scrollbar, body .cp-tabs::-webkit-scrollbar, body .cp-seg::-webkit-scrollbar, body .pp-seg::-webkit-scrollbar,
+  body .ag-seg::-webkit-scrollbar, body .au-seg::-webkit-scrollbar, body .st-tabs::-webkit-scrollbar, body .lv-tabs::-webkit-scrollbar, body .seg::-webkit-scrollbar { display: none; }
+  body .tabs > *, body .cp-tabs > *, body .cp-seg > *, body .pp-seg > *, body .ag-seg > *, body .au-seg > *, body .st-tabs > *, body .lv-tabs > *, body .seg > * {
+    white-space: nowrap; flex: none;
+  }
+  /* the underline of the active tab sits on the bottom edge; keep it inside the scroll area */
+  body .tabs, body .cp-tabs, body .st-tabs { padding-bottom: 1px; }
+}
+
+/* ---------- Page headers: title on top, actions underneath when there isn't room ---------- */
+@media (max-width: 640px) {
+  #app .row.between.ai-start:has(> div > h1), #app .row.between.ai-end:has(> div > h1) { flex-wrap: wrap; row-gap: 14px; }
+  #app .row.between.ai-start:has(> div > h1) > div:first-child, #app .row.between.ai-end:has(> div > h1) > div:first-child { flex: 1 1 100%; min-width: 0; }
+  #app h1, #app .h1, #app .d-l, #app .d-xl { overflow-wrap: anywhere; }
+}
+
+/* ---------- Tables become cards on phones, so every column (and its buttons) is on screen ---------- */
+@media (max-width: 640px) {
+  body .tbl-wrap { overflow: visible !important; border: 0 !important; background: none !important; box-shadow: none !important; padding: 0 !important; }
+  body table.tbl, body table.ag-hist, body table.cp-tbl { display: block; width: 100% !important; min-width: 0 !important; border: 0; }
+  body table.tbl thead, body table.ag-hist thead, body table.cp-tbl thead { display: none; }
+  body table.tbl tbody, body table.ag-hist tbody, body table.cp-tbl tbody { display: flex; flex-direction: column; gap: 10px; }
+  body table.tbl tr, body table.ag-hist tr, body table.cp-tbl tr {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 14px 16px;
+    background: var(--color-bg-surface, #fff); border: 1px solid var(--border); border-radius: 16px;
+  }
+  body table.tbl td, body table.ag-hist td, body table.cp-tbl td {
+    display: block; border: 0 !important; padding: 0 !important; min-width: 0; max-width: 100%; height: auto !important;
+    white-space: normal !important; font-size: 14px;
+  }
+  /* the main cell (name, app, submission) gets the whole first line; a selection checkbox sits beside it */
+  body table.tbl td:first-child:not(:has(input[type=checkbox])), body table.ag-hist td:first-child, body table.cp-tbl td:first-child { flex: 1 1 100%; }
+  body table.tbl td:first-child:has(input[type=checkbox]) { flex: none; }
+  body table.tbl td:first-child:has(input[type=checkbox]) + td { flex: 1 1 calc(100% - 40px); }
+  body table.tbl td:empty { display: none; }
+  /* a row that only says "nothing here" stays a plain block */
+  body table.tbl td[colspan] { flex: 1 1 100%; }
+  body table.tbl tr:has(> td[colspan]) { background: none; border: 0; padding: 0; }
+  body table.tbl .truncate { white-space: normal; }
+  /* each value carries its column name (js/responsive.js adds data-label) */
+  body table.tbl td[data-label]::before, body table.cp-tbl td[data-label]::before, body table.ag-hist td[data-label]::before {
+    content: attr(data-label); display: block; font-size: 11px; line-height: 1.3; color: var(--text-3); margin-bottom: 2px; font-weight: 400;
+  }
+  body table.tbl td:first-child::before, body table.cp-tbl td:first-child::before, body table.ag-hist td:first-child::before,
+  body table.tbl td:first-child:has(input[type=checkbox]) + td::before { content: none !important; }
+}
+
+/* ---------- Floating "Edit text" (admins) sits above the bottom tab bar ---------- */
+@media (max-width: 960px) {
+  body .cms-bar { bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important; }
+}
+
+/* ---------- Listing cards: on two-up phone grids the country shows as a flag, so the app name has room ---------- */
+@media (max-width: 600px) {
+  body .scard .appmeta .cchip { font-size: 0 !important; gap: 0 !important; padding: 0 5px !important; min-width: 0; flex: none; }
+  body .scard .appmeta .cchip .flag { margin: 0 !important; }
+  body .scard .appmeta .grow { min-width: 0; }
+}
+
+/* ---------- App page ---------- */
+/* actions row (Save · Rate · Edit · ⋯) never cuts its labels */
+@media (max-width: 960px) {
+  body .mapp > .row.gap-8 { flex-wrap: wrap; }
+  body .mapp > .row.gap-8 > .btn { min-width: 0; padding-left: 14px; padding-right: 14px; white-space: nowrap; }
+  body .mapp > .row.gap-8 > .btn.grow { flex: 1 1 auto; }
+}
+/* capture dates, then Select / status bar, then Download — left to right, wrapping neatly */
+body .rs-vers { justify-content: flex-start; align-items: center; }
+body .rs-vers .se-selbtn { order: 90; margin-left: 0 !important; }
+body .rs-vers [data-act="upCleanLive"] { order: 91 !important; margin-left: 0 !important; }
+body .rs-vers .rs-dlv { order: 92; margin-left: auto !important; }
+@media (max-width: 640px) {
+  body .rs-vers { gap: 8px; }
+  body .rs-vers .rs-dlv { margin-left: 0 !important; }
+  body .rs-vers button { height: 34px; }
+}
+/* screen viewer header: title on its own line, buttons wrap underneath */
+@media (max-width: 640px) {
+  #rsView .bar { flex-wrap: wrap; row-gap: 8px; padding: 12px 14px; }
+  #rsView .bar > .col { flex: 1 1 calc(100% - 48px); order: 0; }
+  #rsView .bar > [data-act="closeLayer"], #rsView .bar > .icon-btn.grey { order: 1; }
+  #rsView .bar > :not(.col):not(.icon-btn.grey):not([data-act="closeLayer"]) { order: 2; }
+  #rsView .bar .btn { white-space: nowrap; }
+  #rsView .se-acts, #rsView .up-vacts { flex-wrap: wrap; }
+}
+
+/* ---------- Admin console ---------- */
+@media (max-width: 960px) {
+  body .atop .searchbar { flex: 1 1 auto; min-width: 0; max-width: none; }
+}
+
+/* ---------- Docs (MCP) ---------- */
+/* the empty slot in the page pager picked up the phone-mockup style (".ph") */
+body .dx .dx-pager > .ph { all: unset; display: block; }
+@media (max-width: 640px) {
+  body .dx .dx-pager > .ph { display: none; }
+  body .dx-nav { gap: 8px; }
+  body .dx-nav .dx-btn { white-space: nowrap; padding-left: 14px; padding-right: 14px; }
+}
+@media (max-width: 380px) {
+  body .dx-nav .dx-btn { font-size: 14px; padding-left: 12px; padding-right: 12px; }
+}
+
+/* ---------- Dialogs and sheets fit small screens ---------- */
+@media (max-width: 640px) {
+  body .se-dlg { padding: 20px; border-radius: 18px; max-height: calc(100vh - 32px); overflow: auto; }
+  body .se-dlg .acts { flex-wrap: wrap; }
+  body .se-dlg .acts .btn { flex: 1 1 auto; }
+  body .se-bar { left: 12px; right: 12px; transform: none; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); border-radius: 20px; padding: 10px; }
+  body .se-bar .n { flex: 1 1 100%; text-align: center; margin: 0 0 2px; }
+  body .se-bar button { flex: 1 1 auto; justify-content: center; }
+  body .au { padding: 18px; }
+  body .au-row { grid-template-columns: 20px 48px 1fr 32px; gap: 8px; }
+  body .au-row img { width: 48px; height: 48px; }
+  body .au-view { padding: 12px; }
+  body .au-view .bar { width: 100%; }
+}
+
+/* ---------- Landing page header (signed out): logo, Log in and Join for free all fit on a phone ---------- */
+@media (max-width: 480px) {
+  body .lv-nav { gap: 8px; padding: 12px 14px; }
+  body .lv-nav .lv-links { display: none; }
+  body .lv-nav .lv-sp { min-width: 0; }
+  body .lv-logo { flex: none; gap: 8px; }
+  body .lv-logo svg { height: 20px; width: auto; }
+  body .lv-beta { font-size: 12px; padding: 2px 8px; }
+  body .lv-nav .lv-nb { padding: 9px 12px; font-size: 14px; }
+  body .lv-nav .lv-nb.ink { padding: 9px 14px; }
+}
+@media (max-width: 359px) {
+  body .lv-beta { display: none; }
+}
+
+/* ---------- Never let anything push the page sideways ---------- */
+html, body { overflow-x: clip; }
+#app img, #app video { max-width: 100%; }
+@media (max-width: 960px) {
+  #app pre, #app code { white-space: pre-wrap; overflow-wrap: anywhere; }
+  #app input, #app select, #app textarea { max-width: 100%; }
+}

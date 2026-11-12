@@ -1,0 +1,167 @@
+/* ============ Corllet design system · synced from Figma "Corllet new" (Nov 2026) ============
+   Variables: Primitives · Color (Light/Dark) · Spacing · Radius. Text styles: Display, Heading, Body,
+   Label, Caption, Overline (Corllet SAANS). Effects: Shadow/XS–XL. Loaded after the other stylesheets. */
+
+/* Typeface: Corllet SAANS. Uses the installed font first, then the self-hosted files in /fonts. */
+@font-face{font-family:"Corllet SAANS";font-style:normal;font-weight:400;font-display:swap;src:local("Corllet SAANS Regular"),local("CorlletSAANS-Regular"),url("/fonts/CorlletSAANS-Regular.woff2") format("woff2")}
+@font-face{font-family:"Corllet SAANS";font-style:normal;font-weight:500;font-display:swap;src:local("Corllet SAANS Medium"),local("CorlletSAANS-Medium"),url("/fonts/CorlletSAANS-Medium.woff2") format("woff2")}
+@font-face{font-family:"Corllet SAANS";font-style:normal;font-weight:600;font-display:swap;src:local("Corllet SAANS SemiBold"),local("CorlletSAANS-SemiBold"),url("/fonts/CorlletSAANS-SemiBold.woff2") format("woff2")}
+
+:root{
+  /* Primitives (additions) */
+  --o800:#6b3d0d;--o900:#4a2b0c;--g900:#0b3520;--r900:#4f140c;--b900:#0f2552;
+
+  /* Color · Light — Figma names */
+  --color-bg-canvas:var(--n50);--color-bg-surface:var(--n0);--color-bg-subtle:var(--n50);--color-bg-muted:var(--n100);
+  --color-bg-hover:#fdecc8;--color-bg-pressed:var(--n200);--color-bg-inverse:#1d1c1a;--color-bg-inverse-hover:#34322e;
+  --color-bg-accent:var(--o400);--color-bg-accent-subtle:var(--o50);--color-bg-success:var(--g500);--color-bg-success-subtle:var(--g50);
+  --color-bg-danger:var(--r500);--color-bg-danger-subtle:var(--r50);--color-bg-info:var(--b500);--color-bg-info-subtle:var(--b50);
+  --color-bg-new-subtle:var(--p50);--color-bg-disabled:var(--n100);--color-bg-overlay:var(--n950);
+  --color-bg-brand:#116239;--color-bg-brand-subtle:#ecf8f1;
+  --color-text-primary:#1d1c1a;--color-text-secondary:var(--n600);--color-text-tertiary:var(--n400);--color-text-disabled:var(--n300);
+  --color-text-inverse:var(--n0);--color-text-on-accent:#1d1c1a;--color-text-accent:var(--o700);--color-text-success:var(--g700);
+  --color-text-danger:var(--r600);--color-text-info:var(--b600);--color-text-link:var(--b500);--color-text-new:var(--p700);--color-text-brand:#116239;
+  --color-border-default:#e7e4de;--color-border-subtle:var(--n100);--color-border-strong:#d9d5cd;--color-border-focus:var(--b500);
+  --color-border-danger:var(--r500);--color-border-inverse:#1d1c1a;--color-border-brand:#116239;--color-border-hover:#f4a325;
+  --color-icon-primary:#2b2926;--color-icon-secondary:var(--n500);--color-icon-inverse:var(--n0);--color-icon-accent:var(--o500);
+  --color-icon-success:var(--g500);--color-icon-danger:var(--r500);--color-icon-info:var(--b500);
+
+  /* Spacing & radius — Figma names */
+  --space-0:0;--space-2:2px;--space-4:4px;--space-6:6px;--space-8:8px;--space-10:10px;--space-12:12px;--space-14:14px;--space-16:16px;
+  --space-20:20px;--space-24:24px;--space-32:32px;--space-40:40px;--space-48:48px;--space-64:64px;--space-80:80px;
+  --radius-none:0;--radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--radius-2xl:24px;--radius-3xl:32px;--radius-full:999px;
+
+  /* Effects — Shadow/XS–XL */
+  --shadow-xs:0 1px 2px rgba(17,17,16,.06);
+  --shadow-s:0 1px 3px rgba(17,17,16,.08),0 1px 2px rgba(17,17,16,.04);
+  --shadow-m:0 4px 12px rgba(17,17,16,.06),0 2px 4px rgba(17,17,16,.03);
+  --shadow-l:0 12px 32px rgba(17,17,16,.08),0 4px 8px rgba(17,17,16,.03);
+  --shadow-xl:0 24px 64px rgba(17,17,16,.12),0 8px 16px rgba(17,17,16,.04);
+
+  /* Site aliases mapped onto the design system */
+  --text:var(--color-text-primary);--text-2:var(--color-text-secondary);--text-3:var(--color-text-tertiary);--text-dis:var(--color-text-disabled);
+  --bg-canvas:var(--color-bg-canvas);--bg-surface:var(--color-bg-surface);--bg-subtle:var(--color-bg-subtle);--bg-muted:var(--color-bg-muted);
+  --bg-hover:var(--color-bg-hover);--bg-pressed:var(--color-bg-pressed);--bg-inverse:var(--color-bg-inverse);
+  --border:var(--color-border-default);--border-subtle:var(--color-border-subtle);--border-strong:var(--color-border-strong);--focus:var(--color-border-focus);
+  --shadow-sm:var(--shadow-s);--shadow-md:var(--shadow-m);--shadow-lg:var(--shadow-l);
+  --font:"Corllet SAANS","Geist","Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+body{font-family:var(--font);color:var(--color-text-primary)}
+
+/* Text styles — exact Figma values (letter-spacing % → em) */
+.d-xl{font-size:80px;line-height:1.02;letter-spacing:-.025em;font-weight:500}
+.d-l{font-size:60px;line-height:1.06;letter-spacing:-.02em;font-weight:500}
+.h1{font-size:44px;line-height:1.12;letter-spacing:-.016em;font-weight:500}
+.h2{font-size:32px;line-height:1.2;letter-spacing:-.012em;font-weight:500}
+.h3{font-size:24px;line-height:1.28;letter-spacing:-.008em;font-weight:500}
+.h4{font-size:22px;line-height:1.3;letter-spacing:-.004em;font-weight:500}
+.h5{font-size:20px;line-height:1.35;letter-spacing:-.003em;font-weight:500}
+.body-l{font-size:20px;line-height:1.5;letter-spacing:-.002em;font-weight:400}
+.body-m{font-size:16px;line-height:1.5;letter-spacing:0;font-weight:400}
+.body-s{font-size:14px;line-height:1.5;letter-spacing:0;font-weight:400}
+.label-xl{font-size:24px;line-height:1.28;letter-spacing:-.004em;font-weight:500}
+.label-l{font-size:18px;line-height:1.3;letter-spacing:-.002em;font-weight:500}
+.label-m{font-size:16px;line-height:1.3;letter-spacing:0;font-weight:500}
+.label-s{font-size:14px;line-height:1.3;letter-spacing:0;font-weight:500}
+.caption{font-size:13px;line-height:1.4;letter-spacing:0;font-weight:400}
+.overline{font-size:12px;line-height:1.3;letter-spacing:.06em;font-weight:500;text-transform:uppercase}
+/* Type scale = Figma text styles (Display/XL 80 … Overline/S 12), Nov 2026 */
+@media (max-width:960px){.d-xl{font-size:48px}.d-l{font-size:38px}.h1{font-size:32px}.h2{font-size:26px}.h3{font-size:22px}.body-l{font-size:18px}}
+@media (max-width:560px){.d-xl{font-size:38px}}
+
+/* Inverse surfaces (bg/inverse #1d1c1a, hover #34322e) */
+.btn-primary{background:var(--color-bg-inverse);color:var(--color-text-inverse)}
+.btn-primary:hover{background:var(--color-bg-inverse-hover)}
+.chip.on,.cchip.on{background:var(--color-bg-inverse);border-color:var(--color-border-inverse);color:var(--color-text-inverse)}
+.count.dark,.tab.on .count,.badge.new,.badge.dark{background:var(--color-bg-inverse);color:var(--color-text-inverse)}
+.tab.on::after,.ttabs button.on::after{background:var(--color-bg-inverse)}
+.cb:checked{background:var(--color-bg-inverse);border-color:var(--color-bg-inverse)}
+.tgl:checked{background:var(--color-bg-inverse)}
+.rb:checked{border-color:var(--color-bg-inverse)}
+.progress>i,.mbar i,.dots i.on,.wdots i.on{background:var(--color-bg-inverse)}
+.opt-card.on,.paym.on,.plan.pop{border-color:var(--color-border-inverse)}
+.toast,.bulk{background:var(--color-bg-inverse)}
+.bulk .btn:hover{background:var(--color-bg-inverse-hover)}
+.stepper .s.on i{background:var(--color-bg-inverse)}
+.av.d{background:var(--color-bg-inverse)}
+.progress.ochre>i{background:var(--color-bg-accent)}.progress.green>i{background:var(--color-bg-success)}
+
+/* Hover (bg/hover #fdecc8, border/hover #f4a325) */
+.btn-ghost:hover,.icon-btn:hover,.menu button:hover,.menu a:hover,.lrow:hover,.side .si:hover,.tbl tbody tr:hover,.bix-tg:hover{background:var(--color-bg-hover)}
+.btn-secondary:hover{background:var(--color-bg-surface);border-color:var(--color-border-hover)}
+.chip:hover,.cchip:hover,.ccard:hover,.opt-card:hover,.paym:hover,.input:hover,.textarea:hover,.select:hover,.hero .ann:hover,.icon-btn.outline:hover{border-color:var(--color-border-hover)}
+.chip.on:hover,.cchip.on:hover{border-color:var(--color-border-inverse)}
+.input:focus,.textarea:focus,.select:focus,.otpin input:focus{border-color:var(--color-border-focus)}
+.btn-danger{color:var(--color-text-danger)}.btn-danger:hover{background:var(--color-bg-danger-subtle)}
+.btn-accent{background:var(--color-bg-accent);color:var(--color-text-on-accent)}
+
+/* Text & icon colours */
+.link{color:var(--color-text-link)}
+.c-green{color:var(--color-text-success)}.c-red{color:var(--color-text-danger)}.c-accent{color:var(--color-text-accent)}.c-blue{color:var(--color-text-info)}
+.muted{color:var(--color-text-secondary)}.faint{color:var(--color-text-tertiary)}
+.select-wrap .ico,.select-wrap.with-icon .lead{color:var(--color-icon-secondary)}
+
+/* Borders */
+.card,.panel,.stat,.tbl,.plan,.paym,.opt-card,.chip,.cchip,.input,.textarea,.select,.btn-secondary,.icon-btn.outline,.menu,.kbd{border-color:var(--color-border-default)}
+.tbl th{border-bottom-color:var(--color-border-default)}
+.tbl td{border-bottom-color:var(--color-border-subtle)}
+.cb,.rb{border-color:var(--color-border-strong)}
+.divider{background:var(--color-border-default)}
+
+/* Elevation */
+.menu{box-shadow:var(--shadow-l)}
+.modal,.drawer,.viewer,.cmdk,.toast,.bulk{box-shadow:var(--shadow-xl)}
+.seg button.on,.stile .hover-acts .icon-btn,.viewer .navc{box-shadow:var(--shadow-s)}
+
+/* ============ Components = Figma design system (Actions & Inputs, Navigation, Feedback, Data & Display) ============ */
+:root{--color-bg-selected:#fbe7bc}
+/* Button: S 33 / M 41 / L 49, Label/M 16 (L: Label/L 18); primary hover ochre, secondary border/strong */
+body .btn{height:41px;padding:0 20px;font-size:16px;gap:8px}
+body .btn-sm{height:33px;padding:0 14px;font-size:16px;gap:6px}
+body .btn-lg{height:49px;padding:0 26px;font-size:18px}
+body .btn-primary:hover{background:var(--color-bg-accent);color:var(--color-text-on-accent)}
+body .btn-secondary{border-color:var(--color-border-strong)}
+body .btn-secondary:hover{background:var(--color-bg-hover);border-color:var(--color-border-hover)}
+body .btn:disabled,body .btn[disabled]{background:var(--color-bg-disabled);border-color:transparent;color:var(--color-text-disabled)}
+/* Icon button: S 32 / M 40 / L 48 */
+body .icon-btn{width:40px;height:40px}
+body .icon-btn.sm{width:32px;height:32px}
+body .icon-btn.lg{width:48px;height:48px}
+body .icon-btn.grey{background:var(--color-bg-muted)}
+body .icon-btn.dark:hover,body .icon-btn.primary:hover{background:var(--color-bg-accent);color:var(--color-text-on-accent)}
+/* Chip: S 31 (Label/M 16) / M 39 (Label/L 18); hover fills bg/hover with the ochre border */
+body .chip{height:31px;padding:0 12px;font-size:16px;gap:6px}
+body .chip.sm{height:28px;padding:0 10px;font-size:14px}
+body .chip.lg{height:39px;padding:0 16px;font-size:18px}
+body .chip:hover{background:var(--color-bg-hover);border-color:var(--color-border-hover)}
+body .chip.on:hover{background:var(--color-bg-inverse);border-color:var(--color-border-inverse)}
+body .chip.grey{background:var(--color-bg-muted);border-color:var(--color-bg-muted)}
+/* Country chip: S 32 / M 40 */
+body .cchip{height:32px;padding:0 12px 0 5px;font-size:16px;gap:6px}
+body .cchip:hover{background:var(--color-bg-hover);border-color:var(--color-border-hover)}
+body .cchip.on:hover{background:var(--color-bg-inverse)}
+/* Text field & select: filled bg/muted, radius/lg, 48 tall, Body/M 16; hover ochre border; focus white + blue 1.5 */
+body .input,body .select,body .textarea{background-color:var(--color-bg-muted);border-color:transparent;border-radius:var(--radius-lg);font-size:16px;padding-left:14px;padding-right:14px}
+body .input,body .select{height:48px}
+body .textarea{padding-top:12px;padding-bottom:12px}
+body .input:hover,body .select:hover,body .textarea:hover{border-color:var(--color-border-hover)}
+body .input:focus,body .select:focus,body .textarea:focus,body .otpin input:focus{background-color:var(--color-bg-surface);border-color:var(--color-border-focus);box-shadow:0 0 0 .5px var(--color-border-focus);outline:0}
+body .input::placeholder,body .textarea::placeholder{color:var(--color-text-tertiary)}
+body .input:disabled,body .select:disabled,body .textarea:disabled{border-color:var(--color-border-default);color:var(--color-text-disabled)}
+/* Checkbox: 18, radius 4, border 1.5 */
+body .cb{border-radius:4px;border-width:1.5px}
+/* Segmented control: 43 tall, segments 35, Label/M 16 */
+body .seg{padding:4px;gap:2px}
+body .seg button{height:35px;padding:0 18px;font-size:16px}
+/* Menu item: 44 tall, Body/M 16; selected bg/selected */
+body .menu button,body .menu a{min-height:44px;padding:10px 12px;font-size:16px;border-radius:8px}
+body .menu button.on,body .menu a.on,body .menu .sel{background:var(--color-bg-selected)}
+/* Nav item: active bg/selected */
+body .side .si.on,body .side .si.active{background:var(--color-bg-selected);color:var(--color-text-primary)}
+/* Badge: radius 6, Label/S 14 */
+body .badge{border-radius:6px;padding:3px 9px;font-size:14px;line-height:1.3;height:auto}
+/* Kbd: radius 4, Label/S 14 */
+body .kbd{border-radius:4px;font-size:14px}
+/* Toast: pill, 43 tall, Label/M 16 */
+body .toast{border-radius:999px;padding:12px 18px;font-size:16px}
+

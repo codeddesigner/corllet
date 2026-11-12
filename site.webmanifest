@@ -1,0 +1,16 @@
+{
+  "name": "Corllet",
+  "short_name": "Corllet",
+  "description": "The design library for African products.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111110",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

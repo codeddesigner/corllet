@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Corllet Capture",
+  "version": "1.1.0",
+  "description": "Capture websites for Corllet: full pages, sections and recorded interactions, sent to your Corllet admin.",
+  "permissions": ["activeTab", "scripting", "tabs", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_title": "Capture in Corllet", "default_popup": "popup.html", "default_icon": { "128": "icon-128.png" } },
+  "icons": { "128": "icon-128.png" },
+  "content_scripts": [{ "matches": ["https://www.corllet.com/*", "https://corllet.com/*"], "js": ["bridge.js"], "run_at": "document_start" }]
+}

@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /settings
+Disallow: /saved
+Disallow: /collections/
+Disallow: /checkout
+Disallow: /verify
+Disallow: /onboarding
+Disallow: /contribute/
+Disallow: /api/
+
+Sitemap: https://www.corllet.com/sitemap.xml

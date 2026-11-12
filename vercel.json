@@ -1,0 +1,81 @@
+{
+  "redirects": [
+    {
+      "source": "/mcp",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": ".*text/html.*"
+        }
+      ],
+      "destination": "/docs",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/.well-known/oauth-protected-resource",
+      "destination": "/api/oauth?r=prm"
+    },
+    {
+      "source": "/.well-known/oauth-protected-resource/:path*",
+      "destination": "/api/oauth?r=prm"
+    },
+    {
+      "source": "/.well-known/oauth-authorization-server",
+      "destination": "/api/oauth?r=asm"
+    },
+    {
+      "source": "/.well-known/oauth-authorization-server/:path*",
+      "destination": "/api/oauth?r=asm"
+    },
+    {
+      "source": "/oauth/:r(authorize|token|register)",
+      "destination": "/api/oauth?r=:r"
+    },
+    {
+      "source": "/mcp",
+      "destination": "/api/mcp"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/:page(browse|countries|pricing|contribute|search)",
+      "destination": "/api/seo?p=/:page"
+    },
+    {
+      "source": "/:kind(apps|countries)/:slug",
+      "destination": "/api/seo?p=/:kind/:slug"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/capture.js": {
+      "maxDuration": 120,
+      "memory": 2048,
+      "includeFiles": "{capture/agent.js,node_modules/@sparticuz/chromium/bin/**}"
+    },
+    "api/email.js": {
+      "maxDuration": 60
+    },
+    "api/mcp.js": {
+      "maxDuration": 30
+    },
+    "api/paystack.js": {
+      "maxDuration": 30
+    },
+    "api/thumb.js": {
+      "maxDuration": 20,
+      "memory": 1024
+    },
+    "api/oauth.js": {
+      "maxDuration": 15
+    }
+  }
+}
