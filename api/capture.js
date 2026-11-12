@@ -18,6 +18,7 @@
    mode 'logo'   — no browser: finds the site's best icon (apple-touch icon, manifest icons, favicons), uploads it
                    to assets/logos/… and returns { logo: { url, width, height, from } }. */
 import puppeteer from 'puppeteer-core';
+import sharp from 'sharp';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -150,6 +151,7 @@ export default async function handler(req, res){
     let page, prepped = null;
     const open = async u => {
       page = await browser.newPage();
+      page.on('error', e => console.error('[capture] page crashed', u, String(e && e.message || e).slice(0, 120)));
       if (W < 600) await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1');
       else await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
       await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-GB,en;q=0.9' });
@@ -164,16 +166,17 @@ export default async function handler(req, res){
        swaps the whole document ("Attempted to use detached Frame", Kuda did this). Open a fresh tab on the same page,
        set it up again and carry on, instead of failing the whole capture. */
     const GONE = /detached|target closed|session closed|crash|frame was detached|no frame/i;
-    let recoveries = 0, relaunched = false;
+    let recoveries = 0, relaunched = false, safe = false;
     const recover = async () => {
       if (++recoveries > 3) return false;
+      safe = true; // from now on no tall renders: screen-sized shots only, stitched where a taller image is needed
       let u = url; try { const x = page.url(); if (/^https?:/.test(x)) u = x; } catch (e) {}
       console.error('[capture] recover', recoveries, u);
       try { await page.close(); } catch (e) {}
       // on the first loss, start a fresh multi-process browser: the old one may be the problem, not the tab
       if (!relaunched) { relaunched = true; try { await browser.close(); } catch (e) {} browser = await launch(false); }
       await open(u);
-      if (prepped) { try { await page.evaluate(agent()); await page.evaluate((c, a) => window.__corllet[c](...a), 'prep', [{ ...prepped, walk: false }]); } catch (e) {} }
+      if (prepped) { try { await page.evaluate(agent()); await page.evaluate((c, a) => window.__corllet[c](...a), 'prep', [prepped]); } catch (e) {} } // full prep again, walk included, so lazy images load at full resolution instead of blurry placeholders
       return true;
     };
     // bot checks (Cloudflare and friends): give a non-interactive check a few seconds, never try to solve one
@@ -261,9 +264,28 @@ export default async function handler(req, res){
       if (b.full !== false) {
         // one image of the whole page; Chrome can't render one taller than ~16k device pixels, so cap it and step down if needed
         for (const cap of [14000, 9000, 6000]) {
+          if (safe) break;
           const fh = Math.min(docH, Math.floor(cap / S));
           try { const buf = await shot({ clip: { x: 0, y: 0, width: W, height: fh }, captureBeyondViewport: true }); jobs.push(put(who, `${folder}/full.jpg`, buf, 'image/jpeg').then(u => { out.page = { url: u, width: W, height: fh, cropped: fh < docH }; })); break; }
           catch (e) { if (cap === 6000) out.fullError = String(e.message || e).slice(0, 120); }
+        }
+        // the page can't survive one tall render (it crashed): build the full image from screen-sized shots instead, same quality
+        if (safe && !jobs.length) {
+          try {
+            const fh = Math.min(docH, 12000), tiles = [];
+            for (let y = 0; y < fh && Date.now() - t0 < BUDGET - 25000; y += H) {
+              const top = Math.min(y, Math.max(0, fh - H));
+              await ev(t => window.scrollTo(0, t), top); await new Promise(r => setTimeout(r, 500));
+              if (y === H) await call('fixed', false); // fixed headers only once, at the top
+              const real = await ev(() => window.scrollY);
+              tiles.push({ input: await page.screenshot({ type: 'png' }), top: Math.round(real * S), left: 0 });
+              if (top + H >= fh) break;
+            }
+            await call('fixed', true);
+            const last = tiles[tiles.length - 1], outH = Math.min(Math.round(fh * S), last.top + H * S);
+            const buf = await sharp({ create: { width: W * S, height: outH, channels: 3, background: '#ffffff' } }).composite(tiles.filter(t => t.top < outH)).jpeg({ quality: 82 }).toBuffer();
+            jobs.push(put(who, `${folder}/full.jpg`, buf, 'image/jpeg').then(u => { out.page = { url: u, width: W, height: Math.round(outH / S), cropped: outH < docH * S, stitched: true }; }));
+          } catch (e) { out.fullError = String(e.message || e).slice(0, 120); }
         }
       }
       // sections: fixed headers stay only in the first one
@@ -272,7 +294,7 @@ export default async function handler(req, res){
         if (s.i === 1) await call('fixed', false);
         // a very tall section is cut into even parts (about two screens each) instead of being cropped
         const total = Math.min(s.h, docH - s.y); if (total < 60) continue;
-        const parts = total > H * 2.5 ? Math.ceil(total / (H * 2)) : 1;
+        const parts = safe ? Math.ceil(total / H) : total > H * 2.5 ? Math.ceil(total / (H * 2)) : 1;
         for (let p = 0; p < parts; p++) {
           if (Date.now() - t0 > BUDGET - 8000) break;
           const y0 = s.y + Math.round(p * total / parts), h = Math.round(total / parts);
@@ -281,7 +303,7 @@ export default async function handler(req, res){
           await ev(y => window.scrollTo(0, y), y0); await new Promise(r => setTimeout(r, 700));
           // a part Chrome can't paint in one go (huge or GPU-heavy) is retried at one screen tall, then skipped
           let buf = null, got = h;
-          for (const hh of [h, Math.min(h, H), Math.min(h, H)]) { try { buf = await shot({ clip: { x: 0, y: y0, width: W, height: hh }, captureBeyondViewport: hh > H }); got = hh; break; } catch (e) { out.sectionErrors = (out.sectionErrors || 0) + 1; } }
+          for (const hh of [safe ? Math.min(h, H) : h, Math.min(h, H), Math.min(h, H)]) { try { buf = await shot({ clip: { x: 0, y: y0, width: W, height: hh }, captureBeyondViewport: hh > H }); got = hh; break; } catch (e) { out.sectionErrors = (out.sectionErrors || 0) + 1; } }
           if (!buf) continue;
           const title = p ? `${s.title || s.kind} (${p + 1})` : s.title;
           const name = `${String(s.i + 1).padStart(2, '0')}${parts > 1 ? '-' + (p + 1) : ''}-${slug(s.title || s.kind)}.jpg`;
