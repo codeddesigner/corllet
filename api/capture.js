@@ -133,6 +133,7 @@ export default async function handler(req, res){
   const url = safeUrl(b.url); if (!url) return res.status(400).json({ error: 'Give a public http(s) URL' });
   const W = Math.min(Math.max(+b.width || 1440, 320), 1920), H = Math.min(Math.max(+b.height || 900, 480), 1400), S = Math.min(Math.max(+b.scale || 1, 1), 2);
   const mode = ['page', 'steps', 'info', 'screen', 'logo'].includes(b.mode) ? b.mode : 'page';
+  const Q = Math.round(Math.min(Math.max(+b.quality || 82, 50), 100)); // JPEG quality: 82 standard, 90 high, 97 maximum
   if (mode === 'logo') {
     try { const logo = await findLogo(url, b.icon, who, String(b.name || slug(new URL(url).host))); return res.json({ logo, ms: Date.now() - t0 }); }
     catch (e) { return res.status(500).json({ error: String(e && e.message || e).slice(0, 300) }); }
@@ -218,14 +219,14 @@ export default async function handler(req, res){
     if (mode === 'screen') {
       await call('prep', { freeze: !!b.freeze, walk: false }).catch(() => {});
       await ev(() => window.scrollTo(0, 0)); await new Promise(r => setTimeout(r, 600));
-      const buf = await page.screenshot({ type: 'jpeg', quality: 86 });
+      const buf = await page.screenshot({ type: 'jpeg', quality: Math.max(Q, 86) });
       const u = await put(who, `${folder}/screen.jpg`, buf, 'image/jpeg');
       await browser.close(); browser = null;
       return res.json({ info, links, screen: { url: u, width: W * S, height: H * S }, ms: Date.now() - t0 });
     }
     await call('prep', { freeze: !!b.freeze, walk: mode === 'page' });
     // a screenshot that kills the tab gets a fresh tab, then the caller retries smaller
-    const shot = async (opts) => { try { return await page.screenshot({ type: 'jpeg', quality: 82, ...opts }); } catch (e) { if (GONE.test(String(e && e.message))) await recover(); throw e; } };
+    const shot = async (opts) => { try { return await page.screenshot({ type: 'jpeg', quality: Q, ...opts }); } catch (e) { if (GONE.test(String(e && e.message))) await recover(); throw e; } };
     const out = { info, links, page: null, sections: [], frames: [], folder };
 
     // slideshow sites: the page never gets taller than the screen; step through the slides with the wheel / keys
@@ -283,7 +284,7 @@ export default async function handler(req, res){
             }
             await call('fixed', true);
             const last = tiles[tiles.length - 1], outH = Math.min(Math.round(fh * S), last.top + H * S);
-            const buf = await sharp({ create: { width: W * S, height: outH, channels: 3, background: '#ffffff' } }).composite(tiles.filter(t => t.top < outH)).jpeg({ quality: 82 }).toBuffer();
+            const buf = await sharp({ create: { width: W * S, height: outH, channels: 3, background: '#ffffff' } }).composite(tiles.filter(t => t.top < outH)).jpeg({ quality: Q }).toBuffer();
             jobs.push(put(who, `${folder}/full.jpg`, buf, 'image/jpeg').then(u => { out.page = { url: u, width: W, height: Math.round(outH / S), cropped: outH < docH * S, stitched: true }; }));
           } catch (e) { out.fullError = String(e.message || e).slice(0, 120); }
         }
